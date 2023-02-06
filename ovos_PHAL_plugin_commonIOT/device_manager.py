@@ -52,12 +52,24 @@ class CommonIOTDeviceManager:
                     self.handle_channel_up)
         self.bus.on("ovos.iot.device.channel.down",
                     self.handle_channel_down)
+        self.bus.on("ovos.iot.device.change.input",
+                    self.handle_change_input)
+        self.bus.on("ovos.iot.device.send.command",
+                    self.handle_send_command)
         self.bus.on("ovos.iot.device.get.apps",
                     self.handle_get_apps)
         self.bus.on("ovos.iot.device.get.active.app",
                     self.handle_get_active_app)
         self.bus.on("ovos.iot.device.set.active.app",
                     self.handle_set_active_app)
+        self.bus.on("ovos.iot.device.get.temp",
+                    self.handle_get_temp)
+        self.bus.on("ovos.iot.device.set.temp",
+                    self.handle_set_temp)
+        self.bus.on("ovos.iot.device.temp.up",
+                    self.handle_temp_up)
+        self.bus.on("ovos.iot.device.temp.down",
+                    self.handle_temp_down)
 
     # BUS API HANDLERS
     def handle_get_devices(self, message):
@@ -188,9 +200,11 @@ class CommonIOTDeviceManager:
         """
         device_id = message.data.get("device_id", None)
         volume = message.data.get("volume", None)
-        if device_id is not None and volume is not None:
+
+        if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
+                    # Volume = None allows for converse to ask for volume
                     response = device.set_volume(volume)
                     self.bus.emit(message.response(data=response))
                     return
@@ -279,9 +293,10 @@ class CommonIOTDeviceManager:
         """
         device_id = message.data.get("device_id", None)
         channel = message.data.get("channel", None)
-        if device_id is not None and channel is not None:
+        if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
+                    # Channel = None allows for converse to ask for channel
                     response = device.set_channel(channel)
                     self.bus.emit(message.response(data=response))
                     return
@@ -317,7 +332,23 @@ class CommonIOTDeviceManager:
                     return
         else:
             LOG.error("No device id provided")
-
+            
+    def handle_change_input(self, message):
+        """ Handle the change input message
+            Args:
+                message (Message) The message object
+        """
+        device_id = message.data.get("device_id", None)
+        selected_input = message.data.get("selected_input", None)
+        if device_id is not None:
+            for dev_id, device in self.registered_devices.items():
+                if dev_id == device_id:
+                    response = device.change_input(selected_input)
+                    self.bus.emit(message.response(data=response))
+                    return
+        else:
+            LOG.error("No device id provided")
+            
     def handle_get_apps(self, message):
         """ Handle the get apps message
             Args:
@@ -340,10 +371,100 @@ class CommonIOTDeviceManager:
         """
         device_id = message.data.get("device_id", None)
         app = message.data.get("app", None)
-        if device_id is not None and app is not None:
+
+        if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
+                    # app = None allows for converse to ask for an app
                     response = device.set_app(app)
+                    self.bus.emit(message.response(data=response))
+                    return
+        else:
+            LOG.error("No device id provided")
+
+    def handle_send_command(self, message):
+        #NOTE: This was added mainly with android ADB in mind
+        #       You can do a lot with it that a regular smart tv can not
+
+        """ Handle the send command message
+            Args:
+                message (Message): the message object
+        """
+        device_id = message.data.get("device_id", None)
+        command = message.data.get("command", None)
+        if device_id is not None:
+            if command is not None:
+                for dev_id, device in self.registered_devices.items():
+                    if dev_id == device_id:
+                        response = device.send_command(command)
+                        self.bus.emit(message.response(data=response))
+                        return
+            else:
+                LOG.error("No command provided")
+        else:
+            LOG.error("No device id provided")
+
+
+    def handle_get_temp(self, message):
+        """ Handle the get temperature message
+            Args:
+                message (Message): The message object
+        """
+        device_id = message.data.get("device_id", None)
+        if device_id is not None:
+            for dev_id, device in self.registered_devices.items():
+                if dev_id == device_id:
+                    response = device.get_temp()
+                    self.bus.emit(message.response(data=response))
+                    return
+        else:
+            LOG.error("No device id provided")
+
+    def handle_set_temp(self, message):
+        """ Handle the set temperature message
+            Args:
+                message (Message): The message object
+        """
+        device_id = message.data.get("device_id", None)
+        temp = message.data.get("temperature", None)
+        if device_id is not None:
+            for dev_id, device in self.registered_devices.items():
+                if dev_id == device_id:
+                    # Allow the requested temp to be None
+                    # This allows for converse to ask for a temperature
+                    response = device.set_temp(temp)
+                    self.bus.emit(message.response(data=response))
+                    return
+        else:
+            LOG.error("No device id provided")
+
+    def handle_temp_up(self, message):
+        """ Handle the turn temperature up message
+            Args:
+                message (Message): The message object
+        """
+        device_id = message.data.get("device_id", None)
+        temp = message.data.get("temperature", None)
+        if device_id is not None:
+            for dev_id, device in self.registered_devices.items():
+                if dev_id == device_id:
+                    response = device.temp_up()
+                    self.bus.emit(message.response(data=response))
+                    return
+        else:
+            LOG.error("No device id provided")
+
+    def handle_temp_down(self, message):
+        """ Handle the turn temperature down message
+            Args:
+                message (Message): The message object
+        """
+        device_id = message.data.get("device_id", None)
+        temp = message.data.get("temperature", None)
+        if device_id is not None:
+            for dev_id, device in self.registered_devices.items():
+                if dev_id == device_id:
+                    response = device.temp_down()
                     self.bus.emit(message.response(data=response))
                     return
         else:
