@@ -5,8 +5,7 @@ from ovos_plugin_manager.phal import PHALPlugin
 from ovos_utils.gui import GUIInterface
 from ovos_utils.log import LOG
 
-from ovos_plugin_manager.templates.iot import IOTDevicePlugin, IOTScannerPlugin, Bulb, RGBBulb, RGBWBulb
-
+from ovos_plugin_manager.templates.iot import IOTDevicePlugin, IOTScannerPlugin, Bulb, RGBBulb, RGBWBulb, SmartTV
 
 class CommonIOTPluginValidator:
     @staticmethod
@@ -35,7 +34,8 @@ class CommonIOTPlugin(PHALPlugin):
             "generic": IOTDevicePlugin,
             "bulb": Bulb,
             "bulbRGB": RGBBulb,
-            "bulbRGBW": RGBWBulb
+            "bulbRGBW": RGBWBulb,
+            "smartTV": SmartTV
         }
 
         # BUS API
