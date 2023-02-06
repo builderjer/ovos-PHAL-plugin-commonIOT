@@ -200,12 +200,11 @@ class CommonIOTDeviceManager:
         """
         device_id = message.data.get("device_id", None)
         volume = message.data.get("volume", None)
-
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
                     # Volume = None allows for converse to ask for volume
-                    response = device.set_volume(volume)
+                    response = device.set_volume(volume=volume)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -217,10 +216,11 @@ class CommonIOTDeviceManager:
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
+        steps = message.data.get("steps", None)
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
-                    response = device.volume_up()
+                    response = device.volume_up(steps=steps)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -232,10 +232,11 @@ class CommonIOTDeviceManager:
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
+        steps = message.data.get("steps", None)
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
-                    response = device.volume_down()
+                    response = device.volume_down(steps=steps)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -297,7 +298,7 @@ class CommonIOTDeviceManager:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
                     # Channel = None allows for converse to ask for channel
-                    response = device.set_channel(channel)
+                    response = device.set_channel(channel=channel)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -343,7 +344,7 @@ class CommonIOTDeviceManager:
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
-                    response = device.change_input(selected_input)
+                    response = device.change_input(selected_input=selected_input)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -376,7 +377,7 @@ class CommonIOTDeviceManager:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
                     # app = None allows for converse to ask for an app
-                    response = device.set_app(app)
+                    response = device.set_app(app=app)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -396,7 +397,7 @@ class CommonIOTDeviceManager:
             if command is not None:
                 for dev_id, device in self.registered_devices.items():
                     if dev_id == device_id:
-                        response = device.send_command(command)
+                        response = device.send_command(command=command)
                         self.bus.emit(message.response(data=response))
                         return
             else:
@@ -411,10 +412,11 @@ class CommonIOTDeviceManager:
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
+        area = message.data.get("area", None)
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
-                    response = device.get_temp()
+                    response = device.get_temp(area=area)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -432,7 +434,7 @@ class CommonIOTDeviceManager:
                 if dev_id == device_id:
                     # Allow the requested temp to be None
                     # This allows for converse to ask for a temperature
-                    response = device.set_temp(temp)
+                    response = device.set_temp(temp=temp)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -444,11 +446,11 @@ class CommonIOTDeviceManager:
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
-        temp = message.data.get("temperature", None)
+        steps = message.data.get("steps", None)
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
-                    response = device.temp_up()
+                    response = device.temp_up(steps=steps)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -460,11 +462,11 @@ class CommonIOTDeviceManager:
                 message (Message): The message object
         """
         device_id = message.data.get("device_id", None)
-        temp = message.data.get("temperature", None)
+        steps = message.data.get("steps", None)
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
-                    response = device.temp_down()
+                    response = device.temp_down(steps=steps)
                     self.bus.emit(message.response(data=response))
                     return
         else:
@@ -510,11 +512,21 @@ class CommonIOTDeviceManager:
                     self.handle_channel_up)
         self.bus.remove("ovos.iot.device.channel.down",
                     self.handle_channel_down)
+        self.bus.remove("ovos.iot.device.send.command",
+                    self.handle_send_command)
         self.bus.remove("ovos.iot.device.get.apps",
                     self.handle_get_apps)
         self.bus.remove("ovos.iot.device.get.active.app",
                     self.handle_get_active_app)
         self.bus.remove("ovos.iot.device.set.active.app",
                     self.handle_set_active_app)
+        self.bus.remove("ovos.iot.device.get.temp",
+                    self.handle_get_temp)
+        self.bus.remove("ovos.iot.device.set.temp",
+                    self.handle_set_temp)
+        self.bus.remove("ovos.iot.device.temp.up",
+                    self.handle_temp_up)
+        self.bus.remove("ovos.iot.device.temp.down",
+                    self.handle_temp_down)
 
         super().shutdown()
