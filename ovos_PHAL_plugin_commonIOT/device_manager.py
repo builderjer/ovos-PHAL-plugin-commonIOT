@@ -200,6 +200,7 @@ class CommonIOTDeviceManager:
         """
         device_id = message.data.get("device_id", None)
         volume = message.data.get("volume", None)
+
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
@@ -331,7 +332,7 @@ class CommonIOTDeviceManager:
                     return
         else:
             LOG.error("No device id provided")
-
+            
     def handle_change_input(self, message):
         """ Handle the change input message
             Args:
@@ -347,7 +348,7 @@ class CommonIOTDeviceManager:
                     return
         else:
             LOG.error("No device id provided")
-
+            
     def handle_get_apps(self, message):
         """ Handle the get apps message
             Args:
@@ -370,6 +371,7 @@ class CommonIOTDeviceManager:
         """
         device_id = message.data.get("device_id", None)
         app = message.data.get("app", None)
+
         if device_id is not None:
             for dev_id, device in self.registered_devices.items():
                 if dev_id == device_id:
